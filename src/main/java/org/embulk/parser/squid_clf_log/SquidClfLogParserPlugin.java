@@ -1,4 +1,4 @@
-package org.embulk.parser;
+package org.embulk.parser.squid_clf_log;
 
 import org.embulk.config.Config;
 import org.embulk.config.ConfigDefault;
@@ -34,10 +34,10 @@ import com.google.common.base.Throwables;
 
 import org.slf4j.Logger;
 
-public class ApacheLogParserPlugin
+public class SquidClfLogParserPlugin
         implements ParserPlugin
 {
-    private static final Logger logger = Exec.getLogger(ApacheLogParserPlugin.class);
+    private static final Logger logger = Exec.getLogger(SquidClfLogParserPlugin.class);
 
     public enum LogFormat
     {
@@ -74,21 +74,25 @@ public class ApacheLogParserPlugin
         ArrayList<ColumnConfig> columns = new ArrayList<ColumnConfig>();
         final LogFormat format = task.getFormat();
 
-        columns.add(new ColumnConfig("remote_host",STRING ,config));
-        columns.add(new ColumnConfig("identity_check",STRING ,config));
-        columns.add(new ColumnConfig("user",STRING ,config));
-        columns.add(new ColumnConfig("datetime",TIMESTAMP,config));
-        columns.add(new ColumnConfig("method",STRING ,config));
-        columns.add(new ColumnConfig("path",STRING ,config));
-        columns.add(new ColumnConfig("protocol",STRING ,config));
-        columns.add(new ColumnConfig("status",STRING ,config));
-        columns.add(new ColumnConfig("size",STRING ,config));
+        columns.add(new ColumnConfig("client-src-ip-address",STRING ,config));
+        columns.add(new ColumnConfig("request-username-ident",STRING ,config));
+        columns.add(new ColumnConfig("request-username",STRING ,config));
+        columns.add(new ColumnConfig("request-time",TIMESTAMP,config));
+        columns.add(new ColumnConfig("request-method",STRING ,config));
+        columns.add(new ColumnConfig("request-url",STRING ,config));
+        columns.add(new ColumnConfig("request-protocol",STRING ,config));
+        columns.add(new ColumnConfig("response-status",STRING ,config));
+        columns.add(new ColumnConfig("response-bytes",STRING ,config));
 
         // combined
         if( format == LogFormat.combined ){
           columns.add(new ColumnConfig("referer",STRING ,config));
-          columns.add(new ColumnConfig("user_agent",STRING ,config));
+          columns.add(new ColumnConfig("user-agent",STRING ,config));
         }
+
+        // squid status
+        columns.add(new ColumnConfig("squid-status",STRING ,config));
+        columns.add(new ColumnConfig("squid-hierarchy-status",STRING ,config));
 
         Schema schema = new SchemaConfig(columns).toSchema();
         control.run(task.dump(), schema);
@@ -160,6 +164,8 @@ public class ApacheLogParserPlugin
                   pageBuilder.setString(9,accessLogEntryMatcher.group(10));
                   pageBuilder.setString(10,accessLogEntryMatcher.group(11));
               }
+              pageBuilder.setString(11,accessLogEntryMatcher.group(12));
+              pageBuilder.setString(12,accessLogEntryMatcher.group(13));
               pageBuilder.addRecord();
             }
         }
@@ -168,21 +174,22 @@ public class ApacheLogParserPlugin
 
     private String getAccessLogRegex(LogFormat type)
     {
-        final String rexa = "(\\d+(?:\\.\\d+){3})";  // an IP address
-        final String rexs = "(\\S+)";                // a single token (no spaces)
-        final String rexdt = "\\[([^\\]]+)\\]";      // something between [ and ]
-        final String rexstr = "\"(.*?)\"";       // a quoted string
-        final String rexi = "(\\d+)";                // unsigned integer
-        final String rexp = "\"(\\S+)\\s(.*?)\\s(HTTP\\/\\d+\\.\\d+)\""; // method, path, protocol
+        final String ipaddr = "(\\d+(?:\\.\\d+){3})";                     // an IP address
+        final String nospace = "(\\S+)";                                  // a single token (no spaces)
+        final String timestamp = "\\[([^\\]]+)\\]";                       // something between [ and ]
+        final String quotestr = "\"(.*?)\"";                              // a quoted string
+        final String uint = "(\\d+)";                                     // unsigned integer
+        final String query = "\"(\\S+)\\s(.*?)\\s(HTTP\\/\\d+\\.\\d+)\""; // method, path, protocol
+        final String sqstat = "(\\S+)\\:(\\S+)";                          // squid status
 
         String rex;
 
         if( type == LogFormat.combined ){
-          rex = "^" + String.join( " ", rexa, rexs, rexs, rexdt, rexp,
-                             rexi, rexs, rexstr, rexstr) + "$";
+          rex = "^" + String.join( " ", ipaddr, nospace, nospace, timestamp, query,
+                             uint, nospace, quotestr, quotestr, sqstat) + "$";
         } else {
-          rex = "^" + String.join( " ", rexa, rexs, rexs, rexdt, rexp,
-                             rexi, rexs) + "$";
+          rex = "^" + String.join( " ", ipaddr, nospace, nospace, timestamp, query,
+                             uint, nospace, sqstat) + "$";
         }
 
         return rex;

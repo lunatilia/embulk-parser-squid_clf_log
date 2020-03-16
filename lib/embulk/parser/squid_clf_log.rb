@@ -1,3 +1,3 @@
 Embulk::JavaPlugin.register_parser(
-  "apache-log", "org.embulk.parser.ApacheLogParserPlugin",
+  "squid_clf_log", "org.embulk.parser.squid_clf_log.SquidClfLogParserPlugin",
   File.expand_path('../../../../classpath', __FILE__))

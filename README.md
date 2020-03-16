@@ -1,6 +1,6 @@
-# Apache Log parser plugin for Embulk
+# Squid Common/Combined Log Format Log parser plugin for Embulk
 
-Embulk parser plugin for apache log (common, combined)
+TODO: Write short description here and build.gradle file.
 
 ## Overview
 
@@ -9,8 +9,7 @@ Embulk parser plugin for apache log (common, combined)
 
 ## Configuration
 
-- **format**: log format(common,combined) (string, default: combined)
-- **stop_on_invalid_record**: ignore invalid log entries (true, false) (boolean, default: true)
+- **format**: log format(common, combined) (string, default: combined)
 
 ## Example
 
@@ -18,17 +17,13 @@ Embulk parser plugin for apache log (common, combined)
 in:
   type: any file input plugin type
   parser:
-    type: apache-log
+    type: squid_clf_log
     format: common
-    stop_on_invalid_record: true
-```
-
-```
-$ embulk gem install embulk-parser-apache-log
 ```
 
 ## Build
 
 ```
-$ ./gradlew gem
+$ cd embulk-parser-squid_clf_log
+$ ./gradlew package
 ```

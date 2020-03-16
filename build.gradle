@@ -1,6 +1,6 @@
 plugins {
     id "com.jfrog.bintray" version "1.1"
-    id "com.github.jruby-gradle.base" version "0.1.5"
+    id "com.github.jruby-gradle.base" version "1.5.0"
     id "java"
     id "checkstyle"
 }
@@ -13,15 +13,14 @@ configurations {
     provided
 }
 
-version = "0.1.2"
+version = "0.1.0"
 
-sourceCompatibility = 1.7
-
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 dependencies {
-    compile  "org.embulk:embulk-core:0.8.36"
-    provided "org.embulk:embulk-core:0.8.36"
+    compile  "org.embulk:embulk-core:0.9.23"
+    provided "org.embulk:embulk-core:0.9.23"
     // compile "YOUR_JAR_DEPENDENCY_GROUP:YOUR_JAR_DEPENDENCY_MODULE:YOUR_JAR_DEPENDENCY_VERSION"
     testCompile "junit:junit:4.+"
 }
@@ -49,20 +48,25 @@ task checkstyle(type: Checkstyle) {
     classpath = sourceSets.main.output + sourceSets.test.output
     source = sourceSets.main.allJava + sourceSets.test.allJava
 }
+
 task gem(type: JRubyExec, dependsOn: ["gemspec", "classpath"]) {
-    jrubyArgs "-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "build"
-    script "${project.name}.gemspec"
+    jrubyArgs "-S"
+    script "gem"
+    scriptArgs "build", "${project.name}.gemspec"
     doLast { ant.move(file: "${project.name}-${project.version}.gem", todir: "pkg") }
 }
 
 task gemPush(type: JRubyExec, dependsOn: ["gem"]) {
-    jrubyArgs "-rrubygems/gem_runner", "-eGem::GemRunner.new.run(ARGV)", "push"
-    script "pkg/${project.name}-${project.version}.gem"
+    jrubyArgs "-S"
+    script "gem"
+    scriptArgs "push", "pkg/${project.name}-${project.version}.gem"
 }
 
-task "package"(dependsOn: ["gemspec", "classpath"]) << {
-    println "> Build succeeded."
-    println "> You can run embulk with '-L ${file(".").absolutePath}' argument."
+task "package"(dependsOn: ["gemspec", "classpath"]) {
+    doLast {
+        println "> Build succeeded."
+        println "> You can run embulk with '-L ${file(".").absolutePath}' argument."
+    }
 }
 
 task gemspec {
@@ -73,12 +77,12 @@ task gemspec {
 Gem::Specification.new do |spec|
   spec.name          = "${project.name}"
   spec.version       = "${project.version}"
-  spec.authors       = ["Hiroyuki Sato"]
-  spec.summary       = %[Apache Log parser plugin for Embulk]
-  spec.description   = %[Parses Apache Log files read by other file input plugins.]
-  spec.email         = ["hiroysato@gmail.com"]
+  spec.authors       = ["Mitsuki Shirase"]
+  spec.summary       = %[Squid Clf Log parser plugin for Embulk]
+  spec.description   = %[Parses Squid Clf Log files read by other file input plugins.]
+  spec.email         = ["lunatilia@users.noreply.github.com"]
   spec.licenses      = ["MIT"]
-  spec.homepage      = "https://github.com/hiroyuki-sato/embulk-parser-apache-log"
+  spec.homepage      = "https://github.com/lunatilia/embulk-parser-squid_clf_log"
 
   spec.files         = `git ls-files`.split("\n") + Dir["classpath/*.jar"]
   spec.test_files    = spec.files.grep(%r"^(test|spec)/")
@@ -86,17 +90,10 @@ Gem::Specification.new do |spec|
 
   #spec.add_dependency 'YOUR_GEM_DEPENDENCY', ['~> YOUR_GEM_DEPENDENCY_VERSION']
   spec.add_development_dependency 'bundler', ['~> 1.0']
-  spec.add_development_dependency 'rake', ['>= 10.0']
+  spec.add_development_dependency 'rake', ['~> 12.0']
 end
 /$)
     }
 }
 clean { delete "${project.name}.gemspec" }
 
-// for deprecation check
-//
-//allprojects {
-//    tasks.withType(JavaCompile) {
-//        options.compilerArgs << "-Xlint:deprecation"
-//    }
-//}
