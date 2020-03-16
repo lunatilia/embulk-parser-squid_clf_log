@@ -161,11 +161,11 @@ public class SquidClfLogParserPlugin
               pageBuilder.setString(7,accessLogEntryMatcher.group(8));
               pageBuilder.setString(8,accessLogEntryMatcher.group(9));
               if( format == LogFormat.combined ){
-                  pageBuilder.setString(9,accessLogEntryMatcher.group(10));
-                  pageBuilder.setString(10,accessLogEntryMatcher.group(11));
+                  pageBuilder.setString(11,accessLogEntryMatcher.group(12));
+                  pageBuilder.setString(12,accessLogEntryMatcher.group(13));
               }
-              pageBuilder.setString(11,accessLogEntryMatcher.group(12));
-              pageBuilder.setString(12,accessLogEntryMatcher.group(13));
+              pageBuilder.setString(9,accessLogEntryMatcher.group(10));
+              pageBuilder.setString(10,accessLogEntryMatcher.group(11));
               pageBuilder.addRecord();
             }
         }
