@@ -174,21 +174,20 @@ public class SquidClfLogParserPlugin
 
     private String getAccessLogRegex(LogFormat type)
     {
-        final String ipaddr    = "(\\d+(?:\\.\\d+){3})";                      // an IP address
-        final String nospace   = "(\\S+)";                                    // a single token (no spaces)
-        final String timestamp = "\\[([^\\]]+)\\]";                           // something between [ and ]
-        final String quotestr  = "\"(.*?)\"";                                 // a quoted string
-        final String uint      = "(\\d+)";                                    // unsigned integer
-        final String query     = "\"(\\S+)\\s(.*?)\\s(HTTP\\/\\d+\\.\\d+)\""; // method, path, protocol
-        final String sqstat    = "(\\S+)\\:(\\S+)";                           // squid status
+        final String nospace   = "(\\S+)";                                       // a single token (no spaces)
+        final String timestamp = "\\[([^\\]]+)\\]";                              // something between [ and ]
+        final String quotestr  = "\"(.*?)\"";                                    // a quoted string
+        final String uint      = "(\\d+)";                                       // unsigned integer
+        final String query     = "\"(\\S+)\\s(.*?)\\s(\\S+{4}\\/\\d+\\.\\d+)\""; // method, path, protocol
+        final String sqstat    = "(\\S+)\\:(\\S+)";                              // squid status
 
         String rex;
 
         if( type == LogFormat.combined ){
-          rex = "^" + String.join( " ", ipaddr, nospace, nospace, timestamp, query,
+          rex = "^" + String.join( " ", nospace, nospace, nospace, timestamp, query,
                              uint, nospace, quotestr, quotestr, sqstat) + "$";
         } else {
-          rex = "^" + String.join( " ", ipaddr, nospace, nospace, timestamp, query,
+          rex = "^" + String.join( " ", nospace, nospace, nospace, timestamp, query,
                              uint, nospace, sqstat) + "$";
         }
 
