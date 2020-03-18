@@ -26,7 +26,7 @@ in:
 
 ```
 $ cd embulk-parser-squid_clf_log
-$ ./gradlew package
+$ ./gradlew gem
 ```
 
 ## Supported log format
