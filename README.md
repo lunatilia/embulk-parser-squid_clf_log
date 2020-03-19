@@ -1,6 +1,6 @@
 # Squid "Common/Combined Log Format (CLF)" Log parser plugin for Embulk
 
-Embulk parser plugin for Squid CLF log (common/combined).  
+Embulk parser plugin for Squid CLF(Common/Combined Log Format) log.  
 - Forked from [embulk-parser-apache-log](https://github.com/hiroyuki-sato/embulk-parser-apache-log) (Author: [Hiroyuki Sato](https://github.com/hiroyuki-sato))
 
 ## Overview
@@ -20,6 +20,9 @@ in:
   parser:
     type: squid_clf_log
     format: common
+```
+```
+$ embulk gem install embulk-parser-squid_clf_log
 ```
 
 ## Build
